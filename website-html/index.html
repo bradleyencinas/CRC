@@ -57,7 +57,7 @@
                         
                     </div>
                     <script>
-                        fetch('https://pqv4nc2d9f.execute-api.us-east-1.amazonaws.com/Prod/hello')
+                        fetch('https://pqv4nc2d9f.execute-api.us-east-1.amazonaws.com/Prod/get')
                             .then(response => response.json())
                             .then((data) => {
                                 document.getElementById('replaceme').innerText = data.count

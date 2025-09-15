@@ -1,47 +1,40 @@
 import json
+import boto3
 
-# import requests
+# Initialize DynamoDB resource
+dynamodb = boto3.resource('dynamodb')
+
+# Get the table name
+table = dynamodb.Table('bradleyencinaswebsite')
 
 
 def lambda_handler(event, context):
-    """Sample pure Lambda function
 
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
-
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
-
+    # Get the current visit count
+    response = table.get_item(
+        Key={
+            'ID': 'viewcount'
+        }
+    )
+    
+    visit_count = response['Item']['viewcount']
+    visit_count = int(visit_count) + 1
+    
+    # Update the visit count in DynamoDB
+    table.put_item(
+        Item={
+            'ID': 'viewcount',
+            'viewcount': visit_count
+        }
+    )
+    
+    # Return the updated visit count as JSON
     return {
-        "headers": {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*"
-            },
-        "statusCode": 200,
-        "body": json.dumps({
-            "count": 5
-            # "location": ip.text.replace("\n", "")
-        }),
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': '*'
+        },
+        'body': json.dumps({'counter': visit_count})
     }
